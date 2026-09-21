@@ -4,14 +4,14 @@ Paste this into a fresh pod's chat. Everything it needs to know is in the repo.
 
 ```
 Set this pod up from https://github.com/deepak-jha-kgp/gilfoyle — clone it and run
-the runbook at the top of its AGENTS.md verbatim. It takes about twenty seconds.
+./setup.sh (LEMMA_POD_ID is already in your shell). That is the whole job.
 
 Nothing else: no dry run, no npm, no browser, no widget. The app ships prebuilt,
-and its sign-in gate belongs to a human, not to you — reading the pod back with
-`lemma pods describe` is what verified means here.
+and its sign-in gate belongs to a human, not to you — the `lemma pods describe`
+that setup.sh already printed is what verified means here.
 
-Answer in plain text with the GitHub authorize link, and a line each for what
-landed, what is paused, and what is not connected yet. Never invent signals.
+Answer in plain text with the GitHub authorize link it gives you, and a line each
+for what landed, what is paused, and what is not connected. Never invent signals.
 ```
 
 The pod's own assistant can carry this out as delivered: it runs with a fixed,
@@ -37,6 +37,8 @@ the pod. Three things ate it, and each line above closes one:
 - **It built a status widget to report with.** Loading the widget skill, reading a
   starter, writing the HTML and displaying it is another ninety seconds for
   something four sentences say better.
+
+Clone to GitHub link, measured on a fresh pod: **16.5 seconds**.
 
 Telling an agent what *not* to do is worth more here than telling it what to do.
 The work itself was never the slow part.

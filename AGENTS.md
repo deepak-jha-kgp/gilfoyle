@@ -10,32 +10,34 @@ copies drift.
 
 ## Setting a fresh pod up
 
-Five commands, about twenty seconds. Run them; do not improvise around them.
+Two commands, and the second one is somebody else's.
 
 ```bash
 git clone --depth 1 https://github.com/deepak-jha-kgp/gilfoyle && cd gilfoyle
-
-lemma pods import . --set-pod-meta      # every resource, in one pass
-lemma pods describe                     # read back what landed
-
-# The one step a person has to take. Hand them `authorization_url`:
-lemma connectors connect-requests create github --output json
-
-./wire-github.sh                        # after they authorize, and not before
+export LEMMA_POD_ID=<pod>     # already set inside a pod's own workspace
+./setup.sh            # ~15s: everything, then the GitHub link a person must open
+# ... they authorize ...
+./wire-github.sh      # gives the four inbound automations their routing key
 ```
 
-`--set-pod-meta` is what renames the pod to `gilfoyle`. Without it an import
-applies resources and leaves the pod called whatever created it, which is the
-default precisely so that importing into somebody's pod cannot rename it behind
-their back. Here the rename is wanted, so ask for it.
+Measured end to end on a fresh pod: 16.5 seconds from clone to the link. Read
+[setup.sh](setup.sh) rather than reproducing it by hand — it is short, and every
+line of it is there because doing it some other way was slower or wrong.
 
 **There is nothing to build and no variable to resolve.** The app under
 `apps/shipyard-app/source/` is already built, so the import uploads it as-is —
 no `npm`, and none of the three `VITE_LEMMA_*` variables a Vite project would
-demand and a fresh pod could not supply. Do not skip ahead to `npm install`; it
-is the slowest wrong turn available, and there is no `package.json` there to run
-it against. The bundle's `${variables}` are all optional: leave them unresolved
-and the app takes a pod-suffixed slug, which is fine.
+demand and a fresh pod could not supply. Do not skip ahead to `npm install`:
+it is the slowest wrong turn available, and there is no `package.json` there to
+run it against. The bundle's `${variables}` are all optional; leave them
+unresolved and the app takes a pod-suffixed slug, which is fine.
+
+**The rename is a separate import on purpose.** `--set-pod-meta` is the only way
+to name the pod from the CLI, and it applies metadata *first* — so in an
+organization that already has a `gilfoyle`, a `409 POD_CONFLICT` takes the entire
+import down with it before a single table is created. `setup.sh` imports the
+resources first and then renames from a directory holding nothing but `pod.json`,
+which costs four seconds and cannot cost anything else.
 
 **Four automations land unrouted, and that is expected.** `ci-failure`,
 `pr-opened`, `pr-comment` and `issue-opened` route on a GitHub App installation
@@ -46,11 +48,11 @@ that provisions a routing key. All five schedules import **paused**; leave them
 that way until a person says otherwise, because `dispatch-fixer` opens pull
 requests unattended.
 
-**What "verified" means here: reading the pod back.** `lemma pods describe`,
-`lemma schedules list`, `lemma agents permissions get triager`. Not a browser —
-the app puts a Lemma sign-in in front of every visitor, that session belongs to
-a person, and trying to get past it is a long walk to nowhere. Not a widget
-either. Report in plain text.
+**What "verified" means here: reading the pod back.** `lemma pods describe` (which
+`setup.sh` already ran), `lemma schedules list`, `lemma agents permissions get
+triager`. Not a browser — the app puts a Lemma sign-in in front of every visitor,
+that session belongs to a person, and trying to get past it is a long walk to
+nowhere. Not a widget either. Report in plain text.
 
 ## What is here
 
@@ -63,6 +65,7 @@ either. Report in plain text.
 | `surfaces/` | The email address each agent answers on. Created for you; here so a fresh import keeps them |
 | `apps/shipyard-app/` | The app as it ships. `source/` is **built output**, uploaded as-is — that is what makes an import fast. `DESIGN.md` beside it |
 | `app/` | The React project that output is built from. `./app/build.sh` rebuilds it and rewrites `apps/shipyard-app/source/`. Editing the app means editing here |
+| `setup.sh` | Sets a fresh pod up end to end: import, rename, read back, print the GitHub link |
 | `wire-github.sh` | Run once, after a GitHub account is connected: gives the four inbound automations their routing key |
 | `seed/` | `ingest.sh` pulls **real** GitHub events and hands them to the triager |
 | `payloads/` | One fixture for testing an agent by hand |

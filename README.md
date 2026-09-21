@@ -131,18 +131,19 @@ fixer through exactly the same door.
 
 ## Setting it up
 
-About twenty seconds into a pod that already exists:
+Fifteen seconds into a pod that already exists:
 
 ```bash
 git clone --depth 1 https://github.com/deepak-jha-kgp/gilfoyle && cd gilfoyle
-lemma pods import . --pod <pod> --set-pod-meta
+LEMMA_POD_ID=<pod> ./setup.sh
 ```
 
-That is the whole import — tables, both agents with their grants, all five
-automations, the email surfaces, and the app deployed. Nothing is built and no
-`${variable}` has to be resolved: `apps/shipyard-app/source/` ships as built
-output, which the CLI uploads as-is. Then two things are left, and only the first
-is required: [connect GitHub](#1-connect-github--required), and
+That is tables, both agents with their grants, all five automations, the email
+surfaces, the app deployed, the pod named — and it ends by printing the GitHub
+link a person has to open. Nothing is built and no `${variable}` has to be
+resolved: `apps/shipyard-app/source/` ships as built output, which the CLI uploads
+as-is. Then two things are left, and only the first is required:
+[connect GitHub](#1-connect-github--required), and
 [connect the evidence sources](#3-connect-the-evidence-sources--optional-and-the-reason-to-bother).
 
 To have an agent do it instead, hand it [SETUP-PROMPT.md](SETUP-PROMPT.md) — which
@@ -186,8 +187,8 @@ somebody's pod cannot rename it behind their back.
 Authorize an account, then give the four inbound automations their routing key:
 
 ```bash
-lemma connectors connect-requests create github --output json   # open authorization_url
-./wire-github.sh                                                # once it says CONNECTED
+lemma connectors connect-requests create github --output json   # setup.sh printed this link
+./wire-github.sh                                                # once the account says CONNECTED
 ```
 
 Nobody types an installation id. The backend derives the whole routing key —
