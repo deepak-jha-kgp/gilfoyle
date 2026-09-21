@@ -15,9 +15,27 @@ npm run dev     # authenticated as whoever the Lemma CLI is logged in as
 browser pointed at the dev URL is signed in. That token is never written to a file
 and the plugin does not run in `vite build`.
 
+## Shipping it
+
+The bundle does **not** deploy this project. It deploys `../apps/shipyard-app/source/`,
+which is this project's built output, committed to the repository — an `index.html`
+and its assets, with no `package.json` in sight. That is deliberate: the CLI decides
+what to do with an app source by what it finds there, and a `package.json` means
+`npm ci`, `npm run build`, and three required `VITE_LEMMA_*` variables. A fresh pod
+has none of them, so importing this pod used to take minutes and fail halfway. Now
+it takes seconds.
+
+The cost of that is one extra step, and forgetting it is the mistake to expect:
+
 ```bash
-lemma apps deploy shipyard-app . --yes
+./build.sh                                              # dist/ -> ../apps/shipyard-app/source/
+lemma apps deploy shipyard-app ../apps/shipyard-app/source --yes
 ```
+
+`build.sh` clears the `VITE_LEMMA_*` variables before building, because Vite would
+inline a pod id from your `.env.local` into a bundle that goes to a public
+repository, and then refuses to write output that still contains a uuid. An edit to
+`src/` that is committed without running it changes nothing anybody can see.
 
 ## Pod context is injected, never baked
 

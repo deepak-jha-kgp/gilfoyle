@@ -3,20 +3,40 @@
 Paste this into a fresh pod's chat. Everything it needs to know is in the repo.
 
 ```
-Set this pod up from https://github.com/deepak-jha-kgp/gilfoyle — import it into
-this pod, then read its AGENTS.md and README and do what they say.
+Set this pod up from https://github.com/deepak-jha-kgp/gilfoyle — clone it and run
+the runbook at the top of its AGENTS.md verbatim. It takes about twenty seconds.
 
-Stop and ask me for whatever needs a human: connecting GitHub is an OAuth round
-trip, and two import variables do not exist until it is connected.
+Nothing else: no dry run, no npm, no browser, no widget. The app ships prebuilt,
+and its sign-in gate belongs to a human, not to you — reading the pod back with
+`lemma pods describe` is what verified means here.
 
-Never invent signals — fill the queue with seed/ingest.sh or leave it empty. Leave
-the automations paused; dispatch-fixer opens pull requests unattended.
-
-Then tell me what exists, what is connected, what is still paused, and what you
-could not verify.
+Answer in plain text with the GitHub authorize link, and a line each for what
+landed, what is paused, and what is not connected yet. Never invent signals.
 ```
 
 The pod's own assistant can carry this out as delivered: it runs with a fixed,
 batteries-included toolset — a shell, a browser, the pod tools, sub-agents — and
 with **your** permissions rather than grants of its own. There is nothing to
 configure before pasting.
+
+## Why it is written that way
+
+The first version of this prompt said "read its AGENTS.md and README and do what
+they say", and setting a pod up took **over ten minutes**. Almost none of that was
+the pod. Three things ate it, and each line above closes one:
+
+- **The app was a Vite project**, so every import ran `npm ci` and `npm run build`
+  — a minute each time — and then *failed*, because a Vite build demands three
+  `VITE_LEMMA_*` variables a fresh pod has never heard of. The import aborted
+  part-way through, which meant the schedules and the agents' grants never landed,
+  which meant importing again. The app now ships built, and the whole import is
+  one pass of about twelve seconds.
+- **The assistant tried to look at the app in a browser.** It cannot: every visitor
+  meets a Lemma sign-in, and an agent has no session to get past it. That was three
+  minutes of a dead end, twice, and it ended in "could not verify" both times.
+- **It built a status widget to report with.** Loading the widget skill, reading a
+  starter, writing the HTML and displaying it is another ninety seconds for
+  something four sentences say better.
+
+Telling an agent what *not* to do is worth more here than telling it what to do.
+The work itself was never the slow part.

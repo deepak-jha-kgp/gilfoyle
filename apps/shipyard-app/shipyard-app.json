@@ -1,7 +1,9 @@
 {
-  // A single no-build HTML app: `html.html` beside this file is uploaded as-is.
-  // Pod context is injected by the host at serve time, so the same file serves
-  // any pod on any server — nothing about this deployment is baked in.
+  // `source/` beside this file is a prebuilt static site — index.html and its
+  // assets, no package.json — so the import uploads it as-is instead of running
+  // npm. Pod context is injected by the host at serve time as
+  // window.__LEMMA_CONFIG__, so the same bytes serve any pod on any server and
+  // nothing about a deployment is baked in. Rebuild it with ../../app/build.sh.
   "name": "shipyard-app",
   "description": "The triage queue, the changes the pod opened, and the automations that feed both.",
   "public_slug": "${shipyard_app_slug}",

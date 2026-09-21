@@ -131,11 +131,24 @@ fixer through exactly the same door.
 
 ## Setting it up
 
-The quickest path is [SETUP-PROMPT.md](SETUP-PROMPT.md): a prompt to hand a fresh
-pod's agent that walks the whole thing, and doubles as a runbook if you would
-rather do it yourself.
+About twenty seconds into a pod that already exists:
 
-### By hand
+```bash
+git clone --depth 1 https://github.com/deepak-jha-kgp/gilfoyle && cd gilfoyle
+lemma pods import . --pod <pod> --set-pod-meta
+```
+
+That is the whole import — tables, both agents with their grants, all five
+automations, the email surfaces, and the app deployed. Nothing is built and no
+`${variable}` has to be resolved: `apps/shipyard-app/source/` ships as built
+output, which the CLI uploads as-is. Then two things are left, and only the first
+is required: [connect GitHub](#1-connect-github--required), and
+[connect the evidence sources](#3-connect-the-evidence-sources--optional-and-the-reason-to-bother).
+
+To have an agent do it instead, hand it [SETUP-PROMPT.md](SETUP-PROMPT.md) — which
+is mostly a list of detours *not* to take, for reasons that file explains.
+
+### Over the API
 
 Import never creates the pod, and connectors never travel in a bundle.
 
@@ -156,33 +169,31 @@ POST /pods/{pod_id}/bundle/imports/{import_id}/apply
 { "variables": { "github_account": "…", "github_installation": "…" } }
 ```
 
-**Into a brand-new pod, two of those cannot exist yet.** Both need a connected
-GitHub account. Apply without them: the four webhook automations import unrouted,
-which is expected — connect GitHub, then **delete and re-create** those four with
-the variables supplied. Updating them is not enough; provisioning only runs when a
-schedule is created.
+**Into a brand-new pod, two of those cannot exist yet**, and neither is needed.
+Both describe a connected GitHub account. Apply without them: the four webhook
+automations import unrouted, which is expected and which `./wire-github.sh` fixes
+once an account exists. The variables earn their place on a *re*-import, where
+omitting them would strip the routing key back off automations that already work.
 
-**The import does not name the pod** — see the task at the top of
-[AGENTS.md](AGENTS.md). It does not apply `pod_default`'s grants either; that
-command is in step 2 below.
-
-Or from a local clone:
-
-```bash
-lemma pods create gilfoyle --description "Engineering signals in, reviewed changes out."
-lemma pods import . --pod <pod> \
-  --var github_account=<account-id> \
-  --var github_installation=<installation-id>
-```
+**This path does not name the pod.** The applier only applies resource steps, so
+`name` in [pod.json](pod.json) says `gilfoyle` and the pod keeps whatever it was
+called; `PUT /pods/{pod_id} {"name": "gilfoyle"}` fixes that. The CLI has a flag
+for it — `--set-pod-meta`, used above — and defaults to off so that importing into
+somebody's pod cannot rename it behind their back.
 
 ### 1. Connect GitHub — required
 
-The four webhook automations route on `{source, installation_id, event}`. The
-installation id is read off the connected GitHub account; find both with:
+Authorize an account, then give the four inbound automations their routing key:
 
 ```bash
-lemma connectors accounts list --json | grep -i github
+lemma connectors connect-requests create github --output json   # open authorization_url
+./wire-github.sh                                                # once it says CONNECTED
 ```
+
+Nobody types an installation id. The backend derives the whole routing key —
+`{source, installation_id, event}` — from the connected account, but only when a
+schedule is *created*, which is why the script deletes the four and makes them
+again rather than updating them.
 
 > **The trap this bundle is shaped around.** Omit `--var github_account=...` and the
 > import **silently drops `account_id`**: the schedule is created, reports success, and
@@ -298,11 +309,19 @@ a `pull_request` row appears at `drafting`, then `open`, with a branch and a lin
 ## The app
 
 ```bash
-cd apps/shipyard-app/source
+cd app
 npm install
-npm run dev                          # auto-authenticated as whoever the CLI is
-lemma apps deploy shipyard-app . --yes
+npm run dev              # auto-authenticated as whoever the CLI is logged in as
+./build.sh               # rewrites apps/shipyard-app/source/ from dist/
+lemma apps deploy shipyard-app ../apps/shipyard-app/source --yes
 ```
+
+The project lives in `app/`; `apps/shipyard-app/source/` is its **built output**,
+committed, and what the bundle deploys. That split is what makes importing this pod
+take seconds instead of minutes — the CLI builds an app source that has a
+`package.json` and uploads one that does not. So a change to the app is two things:
+edit `app/`, then `./build.sh`. Shipping the first without the second changes
+nothing anybody can see.
 
 Nine routes. **Code** is the home composer — a message there opens a thread with
 whichever agent is selected, Gilfoyle by default. **Signals**, **Conversations** and
@@ -378,10 +397,13 @@ Three things worth knowing before changing it, all in `DESIGN.md` in full:
 AGENTS.md                      how to work in this repo, and what breaks
 pod.json                       metadata + the ${variables} an import resolves
 tables/{signal,triage,pull_request}/
-agents/{triager,fixer,pod_default}/    JSON carries permissions.grants
+agents/{triager,fixer}/         JSON carries permissions.grants
 schedules/{ci-failure,pr-opened,pr-comment,issue-opened,dispatch-fixer}/
 surfaces/resend-*/             the email address each agent answers on
-apps/shipyard-app/             DESIGN.md + source/ (React + Vite)
+apps/shipyard-app/             DESIGN.md + source/ — BUILT output, uploaded as-is
+app/                           the React + Vite project source/ is built from
+app/build.sh                   rebuild it and rewrite apps/shipyard-app/source/
+wire-github.sh                 route the inbound automations, once GitHub is connected
 seed/ingest.sh                 pulls real GitHub events and triages them
 seed/build_payloads.py         shapes `gh` output into webhook payloads
 payloads/                      one fixture for testing an agent by hand
