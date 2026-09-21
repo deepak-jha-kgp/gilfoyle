@@ -106,6 +106,27 @@ not enough. Move the files aside for the build, and keep the uuid guard.
 colleagues' real addresses, their full names, and a remark ranking three of them
 by name. It had always been fine, because the repository had always been private.
 
+## 2c. A missing connector is an install, not a limitation
+
+`connect-requests create <connector>` against an organization that has no auth
+config for it returns **`404 CONNECTOR_NOT_FOUND`**. That error reads like the
+platform does not support the connector there, and it ended one setup with
+"GitHub cannot be connected in this org" and a pod that could never do anything.
+
+It was one command away. `auth-configs create <connector>` defaults to
+`SYSTEM_DEFAULT` — the platform's own OAuth app, no client id, no secret, nobody
+types anything — for any connector whose kind reports `system_default_available`
+and no `install_config_schema`. Measured, on a connector that genuinely had none:
+
+```
+connect-requests create asana  ->  404 CONNECTOR_NOT_FOUND
+auth-configs create asana      ->  ACTIVE, SYSTEM_DEFAULT
+connect-requests create asana  ->  a real authorization_url
+```
+
+So a setup script should try the connect request, install the connector if no URL
+comes back, and try once more — rather than report a wall that is not there.
+
 ## 3. The hero: one sentence, and the thing itself
 
 The hero is the first thing the pod does that the person could not have done in
