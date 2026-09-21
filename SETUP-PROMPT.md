@@ -16,9 +16,7 @@ Then tell me what exists, what is connected, what is still paused, and what you
 could not verify.
 ```
 
-## One precondition
-
-A pod's assistant ships with **no toolsets and no grants** — it cannot run a shell
-or read a table, so it cannot act on this as delivered. Give it a shell first (add
-`WORKSPACE_CLI` to its toolsets), or follow [README.md](README.md#setting-it-up)
-yourself; the steps are the same either way.
+The pod's own assistant can carry this out as delivered: it runs with a fixed,
+batteries-included toolset — a shell, a browser, the pod tools, sub-agents — and
+with **your** permissions rather than grants of its own. There is nothing to
+configure before pasting.

@@ -111,7 +111,7 @@ agent never reaches further than the person it acts for.
 | table | `pull_request` | Changes the pod opened, and ones it watches because a signal named them. |
 | agent | `triager` | Decides what a signal is and how much it matters. Reads PostHog / BigQuery / Sentry / Linear. **Never touches code.** |
 | agent | `fixer` | Reproduces, changes the smallest thing, opens a pull request. Never merges, never pushes to a default branch. |
-| agent | `pod_default` | **Gilfoyle** in the app — what the home composer talks to. Answers *and* acts: reads the queue, and can clone, fix and open a pull request. |
+| — | **Gilfoyle** | The pod's own assistant, which every pod already has. Batteries-included and runs with your permissions, so it is not in this bundle — see step 2. |
 | schedule | `ci-failure` | GitHub `workflow_run` → `triager` |
 | schedule | `pr-opened` | GitHub `pull_request` → `triager` |
 | schedule | `pr-comment` | GitHub `issue_comment` → `triager` |
@@ -201,21 +201,21 @@ lemma connectors accounts list --json | grep -i github
 > with the variables does **not** repair one — provisioning runs only on create, so
 > delete those schedules and import again.
 
-### 2. Grant the pod assistant — it ships with nothing
+### 2. Nothing to do for the assistant
 
-`pod_default` is created with the pod and holds **zero grants and no toolsets**, so
-the "assistant" can read nothing and do nothing until you fix that. The bundle
-carries its definition, but **import does not apply its grants** (it is a
-system-created agent), so apply them directly after import:
+The pod's assistant — **Gilfoyle** in the app — needs no setup. Its toolsets are
+fixed at run time (`WORKSPACE_CLI`, `BROWSER`, `POD`, `SUBAGENTS`, `MESSAGING` and
+the rest) and it runs with **the permissions of whoever is talking to it**, not with
+grants of its own. Its stored row deliberately carries `toolsets: []` and an empty
+instruction; reading those columns and concluding it can do nothing is a mistake the
+code comments warn about.
 
-```bash
-lemma agents permissions add pod_default \
-  signal:read,write triage:read,write pull_request:read,write \
-  connector:github:use connector:posthog:use connector:sentry:use \
-  connector:linear:use connector:googlebigquery:use \
-  agent:triager:execute agent:fixer:execute
-lemma agents permissions get pod_default     # expect 10 grants, not 0
-```
+That is also why this bundle ships no `agents/pod_default/`: its instruction and
+toolsets are pinned by a check constraint, so anything written there would import
+without error and never take effect.
+
+The two agents you *can* configure are `triager` and `fixer`, and they are in the
+bundle.
 
 ### 3. Connect the evidence sources — optional, and the reason to bother
 

@@ -35,7 +35,7 @@ task the next person does twice.
 |---|---|
 | `pod.json` | Pod metadata and the `${variables}` an import must resolve |
 | `tables/` | `signal`, `triage`, `pull_request` — the pod's durable state |
-| `agents/` | `triager`, `fixer`, `pod_default` (**Gilfoyle**). JSON carries the grants; `instruction.md` carries the judgement |
+| `agents/` | `triager` and `fixer`. JSON carries the grants; `instruction.md` carries the judgement. **Gilfoyle** — the pod's own assistant — is not here: its toolsets and instruction are fixed at run time and cannot be configured from a bundle |
 | `schedules/` | The five automations. Four inbound webhooks, one that dispatches the fixer |
 | `surfaces/` | The email address each agent answers on. Created for you; here so a fresh import keeps them |
 | `apps/shipyard-app/` | The React app. `DESIGN.md` beside it, source under `source/` |
