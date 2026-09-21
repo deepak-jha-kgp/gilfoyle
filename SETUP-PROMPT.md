@@ -3,16 +3,15 @@
 Paste this into a fresh pod's chat. Everything it needs to know is in the repo.
 
 ```
-Set this pod up from https://github.com/deepak-jha-kgp/gilfoyle — clone it and run
-./setup.sh (LEMMA_POD_ID is already in your shell). That is the whole job.
-
-Nothing else: no dry run, no npm, no browser, no widget. The app ships prebuilt,
-and its sign-in gate belongs to a human, not to you — the `lemma pods describe`
-that setup.sh already printed is what verified means here.
-
-Answer in plain text with the GitHub authorize link it gives you, and a line each
-for what landed, what is paused, and what is not connected. Never invent signals.
+Set this pod up from https://github.com/deepak-jha-kgp/gilfoyle: clone it, run
+./setup.sh, and do nothing else — no dry run, no npm, no browser, no widget, no
+data you invented. Then show me what it printed, as it printed it.
 ```
+
+`setup.sh` ends by printing the thing a person actually needs: where the app is,
+the three addresses it answers on, the GitHub link only they can open, and the two
+things worth doing afterwards. That copy lives in the script rather than in the
+agent's judgement, so it reads the same every time and costs nothing to produce.
 
 The pod's own assistant can carry this out as delivered: it runs with a fixed,
 batteries-included toolset — a shell, a browser, the pod tools, sub-agents — and
@@ -38,7 +37,7 @@ the pod. Three things ate it, and each line above closes one:
   starter, writing the HTML and displaying it is another ninety seconds for
   something four sentences say better.
 
-Clone to GitHub link, measured on a fresh pod: **16.5 seconds**.
+Clone to finished, measured on a fresh pod: **15 seconds**.
 
 Telling an agent what *not* to do is worth more here than telling it what to do.
 The work itself was never the slow part.

@@ -131,7 +131,7 @@ fixer through exactly the same door.
 
 ## Setting it up
 
-Fifteen seconds into a pod that already exists:
+Fifteen seconds, into a pod that already exists:
 
 ```bash
 git clone --depth 1 https://github.com/deepak-jha-kgp/gilfoyle && cd gilfoyle
@@ -139,8 +139,8 @@ LEMMA_POD_ID=<pod> ./setup.sh
 ```
 
 That is tables, both agents with their grants, all five automations, the email
-surfaces, the app deployed, the pod named — and it ends by printing the GitHub
-link a person has to open. Nothing is built and no `${variable}` has to be
+surfaces, the app deployed, the pod named — and it ends by printing where the app
+is, the three addresses it answers on, the GitHub link, and what to do next. Nothing is built and no `${variable}` has to be
 resolved: `apps/shipyard-app/source/` ships as built output, which the CLI uploads
 as-is. Then two things are left, and only the first is required:
 [connect GitHub](#1-connect-github--required), and

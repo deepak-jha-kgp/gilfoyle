@@ -15,14 +15,17 @@ Two commands, and the second one is somebody else's.
 ```bash
 git clone --depth 1 https://github.com/deepak-jha-kgp/gilfoyle && cd gilfoyle
 export LEMMA_POD_ID=<pod>     # already set inside a pod's own workspace
-./setup.sh            # ~15s: everything, then the GitHub link a person must open
+./setup.sh            # ~15s: everything, then what to tell the person
 # ... they authorize ...
 ./wire-github.sh      # gives the four inbound automations their routing key
 ```
 
-Measured end to end on a fresh pod: 16.5 seconds from clone to the link. Read
-[setup.sh](setup.sh) rather than reproducing it by hand — it is short, and every
-line of it is there because doing it some other way was slower or wrong.
+Measured end to end on a fresh pod: 15 seconds. `setup.sh` finishes by printing
+the orientation a person needs — the app's address, the three inboxes, the GitHub
+link, and what is worth doing next — so hand that on as printed rather than
+writing your own. Read [setup.sh](setup.sh) rather than reproducing it by hand:
+it is short, and every line is there because doing it some other way was slower
+or wrong.
 
 **There is nothing to build and no variable to resolve.** The app under
 `apps/shipyard-app/source/` is already built, so the import uploads it as-is —
@@ -65,7 +68,7 @@ nowhere. Not a widget either. Report in plain text.
 | `surfaces/` | The email address each agent answers on. Created for you; here so a fresh import keeps them |
 | `apps/shipyard-app/` | The app as it ships. `source/` is **built output**, uploaded as-is — that is what makes an import fast. `DESIGN.md` beside it |
 | `app/` | The React project that output is built from. `./app/build.sh` rebuilds it and rewrites `apps/shipyard-app/source/`. Editing the app means editing here |
-| `setup.sh` | Sets a fresh pod up end to end: import, rename, read back, print the GitHub link |
+| `setup.sh` | Sets a fresh pod up end to end: name, import, then the orientation to hand the person |
 | `wire-github.sh` | Run once, after a GitHub account is connected: gives the four inbound automations their routing key |
 | `seed/` | `ingest.sh` pulls **real** GitHub events and hands them to the triager |
 | `payloads/` | One fixture for testing an agent by hand |
