@@ -10,14 +10,21 @@ copies drift.
 
 ## One outstanding task
 
-**Rename the pod to `gilfoyle`.** The repository is called that, the assistant is
-called that, and the pod is still called `shipyard` — the leftover of an earlier
-name. Change `name` in [pod.json](pod.json), and anywhere in the prose that names
-the *pod* rather than the app.
+**Rename the pod you imported this into, to `gilfoyle`.**
 
-Leave `shipyard-app` alone: the app's name is its upsert key and its public slug, and
-renaming it would strand the deployed app at a URL nothing points to any more. The
-pod name is safe to change because a pod is addressed by id, not by name.
+Importing a bundle does **not** rename the pod. `POST /pods/{pod_id}/bundle/imports`
+applies resources into a pod that already exists, and the applier never touches pod
+metadata — so `name` in [pod.json](pod.json) says `gilfoyle`, and the pod it landed
+in is still called whatever created it. One call fixes that:
+
+```
+PUT /pods/{pod_id}   {"name": "gilfoyle"}
+```
+
+There is no CLI verb for it; from an SDK it is `pods.update(podId, { name: 'gilfoyle' })`.
+
+Leave `shipyard-app` alone. An app's name is its upsert key *and* its public slug,
+so renaming it strands whatever is already deployed at that URL.
 
 **Then delete this section.** A task that stays in the file after it is done is a
 task the next person does twice.
@@ -41,7 +48,7 @@ There is nothing to run. The unit of work is the directory: edit a file, import 
 test the layer you touched.
 
 ```bash
-lemma pods create shipyard --description "Engineering signals in, reviewed changes out."
+lemma pods create gilfoyle --description "Engineering signals in, reviewed changes out."
 lemma pods import . --pod <pod> \
   --var github_account=<account-id> \
   --var github_installation=<installation-id>

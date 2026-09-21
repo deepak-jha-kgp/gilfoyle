@@ -32,7 +32,7 @@ and branch from the default branch:
 
 ```
 git clone https://github.com/{owner}/{repo}.git   # only if the directory is empty
-git fetch origin && git checkout -b shipyard/{short-slug} origin/{default-branch}
+git fetch origin && git checkout -b gilfoyle/{short-slug} origin/{default-branch}
 ```
 
 **3. Reproduce before you change anything.** Run the failing test, the failing command,

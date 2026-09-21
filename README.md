@@ -1,4 +1,4 @@
-# shipyard
+# gilfoyle
 
 Engineering signals in, reviewed changes out.
 
@@ -133,8 +133,22 @@ fixer through exactly the same door.
 
 Import never creates the pod, and connectors never travel in a bundle.
 
+From this repository, straight into a pod that already exists — which is how this
+is meant to be used, including into a pod created for somebody the first time they
+message Lemma:
+
+```
+POST /pods/{pod_id}/bundle/imports
+{ "kind": "GITHUB", "repo_url": "https://github.com/deepak-jha-kgp/gilfoyle" }
+```
+
+Poll until `AWAITING_CONFIRMATION`, read the plan, then apply it. **The import does
+not name the pod** — see the task at the top of [AGENTS.md](AGENTS.md).
+
+Or from a local clone:
+
 ```bash
-lemma pods create shipyard --description "Engineering signals in, reviewed changes out."
+lemma pods create gilfoyle --description "Engineering signals in, reviewed changes out."
 lemma pods import . --pod <pod> \
   --var github_account=<account-id> \
   --var github_installation=<installation-id>
@@ -351,6 +365,16 @@ seed/ingest.sh                 pulls real GitHub events and triages them
 seed/build_payloads.py         shapes `gh` output into webhook payloads
 payloads/                      one fixture for testing an agent by hand
 ```
+
+## A note on the names
+
+Three things are nearly the same word, on purpose and not:
+
+| | |
+|---|---|
+| **gilfoyle** | the pod — everything in this repository |
+| **Gilfoyle** | the assistant inside it (`pod_default` on the wire) |
+| **shipyard-app** | the app. Its name is its public slug, so it keeps the older one rather than stranding a deployed URL |
 
 ## Built with
 

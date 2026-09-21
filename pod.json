@@ -1,6 +1,6 @@
 {
   "format_version": 3,
-  "name": "shipyard",
+  "name": "gilfoyle",
   "description": "Engineering signals in, reviewed changes out. GitHub, Sentry and Linear events are triaged by an agent that checks real blast radius before anyone reads them.",
   "variables": {
     "github_account": {
