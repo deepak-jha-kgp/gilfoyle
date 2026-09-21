@@ -1,0 +1,26 @@
+{
+  "action": "completed",
+  "workflow_run": {
+    "id": 9928311047,
+    "name": "CI",
+    "head_branch": "main",
+    "head_sha": "c71aab475e2d9f3a1b8e4477d2c9f01a5e6b7788",
+    "status": "completed",
+    "conclusion": "failure",
+    "html_url": "https://github.com/lemma-work/lemma-platform/actions/runs/9928311047",
+    "created_at": "2026-09-20T17:52:10Z",
+    "actor": { "login": "deepak-jha-kgp" },
+    "head_commit": {
+      "message": "Surfaces: objects with constructors, and indexes that match the queries (#754)"
+    }
+  },
+  "repository": { "id": 771223344, "full_name": "lemma-work/lemma-platform", "default_branch": "main" },
+  "sender": { "login": "deepak-jha-kgp" },
+  "failed_jobs": [
+    {
+      "name": "backend-tests",
+      "conclusion": "failure",
+      "log_excerpt": "FAILED app/modules/agent_surfaces/tests/unit/test_envelope.py::test_thread_key_is_stable - AttributeError: 'SlackAdapter' object has no attribute 'parse_channel_setup'\n  app/modules/agent_surfaces/services/surface_service.py:412: in route_inbound\n      setup = adapter.parse_channel_setup(payload)\n  E   AttributeError: 'TelegramAdapter' object has no attribute 'parse_channel_setup'\n===== 1 failed, 2841 passed in 96.22s ====="
+    }
+  ]
+}

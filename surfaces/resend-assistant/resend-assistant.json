@@ -1,0 +1,6 @@
+{
+  "credential_mode": "SYSTEM",
+  "is_enabled": true,
+  "name": "resend-assistant",
+  "platform": "RESEND"
+}

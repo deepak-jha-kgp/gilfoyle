@@ -1,0 +1,7 @@
+{
+  "credential_mode": "SYSTEM",
+  "default_agent_name": "triager",
+  "is_enabled": true,
+  "name": "resend-triager",
+  "platform": "RESEND"
+}

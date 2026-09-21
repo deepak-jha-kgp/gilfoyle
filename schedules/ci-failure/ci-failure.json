@@ -1,0 +1,19 @@
+{
+  "name": "ci-failure",
+  // A CI run went red. Find out why, and whether it matters.
+  "schedule_type": "WEBHOOK",
+  // The routing key, in full. Provisioning writes {source, installation_id,
+  // event} from the connected account at create time -- but `config` is replaced
+  // wholesale on every update, so a bundle carrying only {"source": "github"}
+  // strips the installation id on re-import and leaves a schedule that looks
+  // right and can never fire. Carrying the whole key keeps re-import idempotent.
+  // The installation belongs to whoever installed the App, so it is a variable.
+  "config": { "source": "github", "event": "workflow_run", "installation_id": "${github_installation}" },
+  "account_id": "${github_account}",
+  "connector_trigger_id": "github:http:workflow_run",
+  "agent_name": "triager",
+  "instruction": "Triage this failed CI run. Read the failing job's log excerpt and name the actual cause, not the symptom. A failure on the default branch is more serious than one on a branch. If the same job has failed this way before, it is a regression, not a bug.",
+  "filter_instruction": "Run only when a workflow run has completed with conclusion 'failure' or 'timed_out'. Skip successes, cancellations, skipped runs, re-run requests still in progress, and any run on a branch whose name starts with 'dependabot/' or 'renovate/'.",
+  "is_active": false,
+  "visibility": "POD"
+}

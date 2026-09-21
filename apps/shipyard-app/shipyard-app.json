@@ -1,0 +1,9 @@
+{
+  // A single no-build HTML app: `html.html` beside this file is uploaded as-is.
+  // Pod context is injected by the host at serve time, so the same file serves
+  // any pod on any server — nothing about this deployment is baked in.
+  "name": "shipyard-app",
+  "description": "The triage queue, the changes the pod opened, and the automations that feed both.",
+  "public_slug": "${shipyard_app_slug}",
+  "visibility": "PUBLIC"
+}

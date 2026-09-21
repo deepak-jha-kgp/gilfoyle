@@ -1,0 +1,31 @@
+{
+  // Every inbound event that survived its automation's filter gate.
+  // Shared: this is a team queue, not per-person state.
+  "name": "signal",
+  "primary_key_column": "id",
+  "enable_rls": false,
+  "visibility": "POD",
+  "columns": [
+    { "name": "source", "type": "ENUM", "required": true, "default": "github",
+      "options": ["github", "sentry", "linear", "slack", "manual"] },
+    // Dotted event name as the provider spells it: workflow_run.failure,
+    // pull_request.opened, issue_comment.created.
+    { "name": "kind", "type": "TEXT", "required": true, "max_length": 120 },
+    { "name": "title", "type": "TEXT", "required": true, "max_length": 300 },
+    { "name": "body", "type": "TEXT" },
+    { "name": "repo", "type": "TEXT", "max_length": 200 },
+    // The dedupe key. A redelivered webhook must not open a second signal.
+    { "name": "external_id", "type": "TEXT", "unique": true, "max_length": 300 },
+    { "name": "external_url", "type": "TEXT", "max_length": 600 },
+    { "name": "actor", "type": "TEXT", "max_length": 120 },
+    { "name": "payload", "type": "JSON" },
+    { "name": "status", "type": "ENUM", "required": true, "default": "new",
+      "options": ["new", "triaging", "triaged", "dismissed", "actioned"] },
+    { "name": "received_at", "type": "DATETIME" },
+    // Who is on this. Deliberately on `signal` rather than `triage`: a signal
+    // nobody has triaged yet is exactly the kind somebody should be able to
+    // claim, and it would have no triage row to hang an owner off.
+    { "name": "assignee", "type": "USER" }
+  ],
+  "config": {}
+}

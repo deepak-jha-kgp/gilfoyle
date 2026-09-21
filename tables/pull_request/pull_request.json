@@ -1,0 +1,22 @@
+{
+  // A change the pod opened, or one it is watching because a signal named it.
+  "name": "pull_request",
+  "primary_key_column": "id",
+  "enable_rls": false,
+  "visibility": "POD",
+  "columns": [
+    { "name": "signal_id", "type": "UUID",
+      "foreign_key": { "references": "signal.id" } },
+    { "name": "repo", "type": "TEXT", "required": true, "max_length": 200 },
+    { "name": "number", "type": "INTEGER" },
+    { "name": "title", "type": "TEXT", "max_length": 300 },
+    { "name": "url", "type": "TEXT", "max_length": 600 },
+    { "name": "branch", "type": "TEXT", "max_length": 200 },
+    { "name": "state", "type": "ENUM", "required": true, "default": "drafting",
+      "options": ["drafting", "open", "checks_failing", "checks_passing", "merged", "closed"] },
+    { "name": "checks", "type": "JSON" },
+    { "name": "summary", "type": "TEXT" },
+    { "name": "by_agent", "type": "BOOLEAN", "default": true }
+  ],
+  "config": {}
+}

@@ -1,0 +1,18 @@
+{
+  // The hinge of the pod. The triager (or a person, from the app's "Fix it"
+  // button) sets a triage row's action to "fix" and the fixer wakes up.
+  // `to` rather than `equals`: this fires on the write that MADE it "fix",
+  // not on every later edit of a row that already is.
+  "name": "dispatch-fixer",
+  // A triage was marked action=fix. Wake the fixer.
+  "schedule_type": "DATASTORE",
+  "config": {
+    "table_name": "triage",
+    "operations": ["INSERT", "UPDATE"],
+    "when": { "action": { "to": "fix" } }
+  },
+  "agent_name": "fixer",
+  "instruction": "This triage row was marked for a fix. Read the linked signal for the repository and the failing output, reproduce the problem, make the smallest safe change, and open a pull request. If you cannot reproduce it, say so and stop.",
+  "is_active": false,
+  "visibility": "POD"
+}

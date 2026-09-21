@@ -1,0 +1,30 @@
+{
+  // The triager's verdict on one signal. Separate from `signal` because the
+  // event is a fact and the verdict is a judgement that can be revised.
+  "name": "triage",
+  "primary_key_column": "id",
+  "enable_rls": false,
+  "visibility": "POD",
+  "columns": [
+    { "name": "signal_id", "type": "UUID", "required": true,
+      "foreign_key": { "references": "signal.id" } },
+    { "name": "verdict", "type": "ENUM", "required": true,
+      "options": ["bug", "regression", "question", "feature_request", "noise"] },
+    { "name": "severity", "type": "ENUM", "required": true, "default": "normal",
+      "options": ["critical", "high", "normal", "low"] },
+    { "name": "confidence", "type": "FLOAT" },
+    // Users affected, from PostHog. Null means the question could not be asked,
+    // which is different from zero and the app shows it differently.
+    { "name": "blast_radius", "type": "INTEGER" },
+    { "name": "revenue_at_risk", "type": "FLOAT" },
+    { "name": "summary", "type": "TEXT", "required": true },
+    { "name": "reproduction", "type": "TEXT" },
+    { "name": "suggested_owner", "type": "TEXT", "max_length": 120 },
+    { "name": "missing_evidence", "type": "TEXT" },
+    { "name": "evidence", "type": "JSON" },
+    // Setting this to "fix" is what wakes the fixer — see schedules/dispatch-fixer.
+    { "name": "action", "type": "ENUM", "required": true, "default": "watch",
+      "options": ["fix", "escalate", "watch", "close"] }
+  ],
+  "config": {}
+}

@@ -1,0 +1,19 @@
+{
+  "name": "issue-opened",
+  // A new issue arrived. Is it real, and how bad?
+  "schedule_type": "WEBHOOK",
+  // The routing key, in full. Provisioning writes {source, installation_id,
+  // event} from the connected account at create time -- but `config` is replaced
+  // wholesale on every update, so a bundle carrying only {"source": "github"}
+  // strips the installation id on re-import and leaves a schedule that looks
+  // right and can never fire. Carrying the whole key keeps re-import idempotent.
+  // The installation belongs to whoever installed the App, so it is a variable.
+  "config": { "source": "github", "event": "issues", "installation_id": "${github_installation}" },
+  "account_id": "${github_account}",
+  "connector_trigger_id": "github:http:issues",
+  "agent_name": "triager",
+  "instruction": "Triage this issue as a report from a user. Before deciding severity, find out how many people are affected — that is what PostHog is granted to you for. An eloquent report of something one person hit is not high severity, and a terse report of something hundreds hit is.",
+  "filter_instruction": "Run only when an issue is opened or reopened and describes a problem, a regression, a crash, a data issue, or a broken workflow. Skip labels, assignments, closes and edits. Skip feature requests, questions, and issues opened by a bot.",
+  "is_active": false,
+  "visibility": "POD"
+}

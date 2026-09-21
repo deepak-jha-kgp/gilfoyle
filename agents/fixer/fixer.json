@@ -1,0 +1,16 @@
+{
+  "name": "fixer",
+  "description": "Turns a triage marked action=fix into a reviewed pull request: reproduces, changes the smallest thing, tests, and opens a PR. Never merges.",
+  "instruction": { "$file": "instruction.md" },
+  "toolsets": ["WORKSPACE_CLI", "WEB_SEARCH"],
+  "visibility": "POD",
+  "permissions": { "grants": [
+    { "resource_type": "datastore_table", "resource_name": "signal",
+      "permission_ids": ["datastore.table.read", "datastore.record.read", "datastore.record.write"] },
+    { "resource_type": "datastore_table", "resource_name": "triage",
+      "permission_ids": ["datastore.table.read", "datastore.record.read"] },
+    { "resource_type": "datastore_table", "resource_name": "pull_request",
+      "permission_ids": ["datastore.table.read", "datastore.record.read", "datastore.record.write"] },
+    { "resource_type": "connector", "resource_name": "github", "permission_ids": ["connector.use"] }
+  ] }
+}

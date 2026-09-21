@@ -1,0 +1,20 @@
+{
+  "name": "triager",
+  "description": "Decides what an inbound engineering signal is and how much it matters, with evidence from PostHog, BigQuery and Sentry. Writes signal + triage rows; never touches code.",
+  "instruction": { "$file": "instruction.md" },
+  "toolsets": ["WEB_SEARCH"],
+  "visibility": "POD",
+  "permissions": { "grants": [
+    { "resource_type": "datastore_table", "resource_name": "signal",
+      "permission_ids": ["datastore.table.read", "datastore.record.read", "datastore.record.write"] },
+    { "resource_type": "datastore_table", "resource_name": "triage",
+      "permission_ids": ["datastore.table.read", "datastore.record.read", "datastore.record.write"] },
+    { "resource_type": "datastore_table", "resource_name": "pull_request",
+      "permission_ids": ["datastore.table.read", "datastore.record.read"] },
+    { "resource_type": "connector", "resource_name": "github", "permission_ids": ["connector.use"] },
+    { "resource_type": "connector", "resource_name": "posthog", "permission_ids": ["connector.use"] },
+    { "resource_type": "connector", "resource_name": "googlebigquery", "permission_ids": ["connector.use"] },
+    { "resource_type": "connector", "resource_name": "sentry", "permission_ids": ["connector.use"] },
+    { "resource_type": "connector", "resource_name": "linear", "permission_ids": ["connector.use"] }
+  ] }
+}

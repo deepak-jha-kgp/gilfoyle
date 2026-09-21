@@ -1,0 +1,21 @@
+{
+  "format_version": 3,
+  "name": "shipyard",
+  "description": "Engineering signals in, reviewed changes out. GitHub, Sentry and Linear events are triaged by an agent that checks real blast radius before anyone reads them.",
+  "variables": {
+    "github_account": {
+      "type": "account",
+      "connector": "github",
+      "connector_kind": "http",
+      "description": "GitHub App installation account the four webhook automations route from"
+    },
+    "shipyard_app_slug": {
+      "type": "app_slug",
+      "description": "Public URL slug for the app (unique platform-wide; a suffix is added on collision)"
+    },
+    "github_installation": {
+      "type": "string",
+      "description": "GitHub App installation id the webhook automations route on; read off the connected account when a schedule is first created"
+    }
+  }
+}

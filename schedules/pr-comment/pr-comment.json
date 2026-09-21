@@ -1,0 +1,19 @@
+{
+  "name": "pr-comment",
+  // Someone asked for a change on a pull request.
+  "schedule_type": "WEBHOOK",
+  // The routing key, in full. Provisioning writes {source, installation_id,
+  // event} from the connected account at create time -- but `config` is replaced
+  // wholesale on every update, so a bundle carrying only {"source": "github"}
+  // strips the installation id on re-import and leaves a schedule that looks
+  // right and can never fire. Carrying the whole key keeps re-import idempotent.
+  // The installation belongs to whoever installed the App, so it is a variable.
+  "config": { "source": "github", "event": "issue_comment", "installation_id": "${github_installation}" },
+  "account_id": "${github_account}",
+  "connector_trigger_id": "github:http:issue_comment",
+  "agent_name": "triager",
+  "instruction": "This is feedback on a pull request. Decide whether it names a concrete, actionable change — a named file, a described defect, a specific request — or whether it is discussion. Actionable feedback with a clear scope is action 'fix'. Discussion, praise and questions are 'watch' or 'close'.",
+  "filter_instruction": "Run only when a comment is created on a pull request (not a plain issue) and asks for a change to the code. Skip edits and deletions of comments, skip comments from bots and from CI, skip approvals and 'LGTM', and skip comments that only ask a question about intent.",
+  "is_active": false,
+  "visibility": "POD"
+}

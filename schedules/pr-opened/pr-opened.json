@@ -1,0 +1,19 @@
+{
+  "name": "pr-opened",
+  // A pull request opened or was pushed to. Size it up.
+  "schedule_type": "WEBHOOK",
+  // The routing key, in full. Provisioning writes {source, installation_id,
+  // event} from the connected account at create time -- but `config` is replaced
+  // wholesale on every update, so a bundle carrying only {"source": "github"}
+  // strips the installation id on re-import and leaves a schedule that looks
+  // right and can never fire. Carrying the whole key keeps re-import idempotent.
+  // The installation belongs to whoever installed the App, so it is a variable.
+  "config": { "source": "github", "event": "pull_request", "installation_id": "${github_installation}" },
+  "account_id": "${github_account}",
+  "connector_trigger_id": "github:http:pull_request",
+  "agent_name": "triager",
+  "instruction": "Size up this pull request: what it changes, what it risks, and who should look at it. Record it as a signal with verdict 'question' unless the diff itself describes a defect being introduced. Do not review the code line by line — that is a reviewer's job, not a triager's.",
+  "filter_instruction": "Run only when a pull request is opened or reopened, or marked ready for review. Skip drafts, skip synchronize/push events on an existing PR, skip label, assignee and milestone changes, skip closes and merges, and skip pull requests opened by a bot.",
+  "is_active": false,
+  "visibility": "POD"
+}
