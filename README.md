@@ -148,8 +148,23 @@ POST /pods/{pod_id}/bundle/imports
 { "kind": "GITHUB", "repo_url": "https://github.com/deepak-jha-kgp/gilfoyle" }
 ```
 
-Poll until `AWAITING_CONFIRMATION`, read the plan, then apply it. **The import does
-not name the pod** — see the task at the top of [AGENTS.md](AGENTS.md).
+Poll until `AWAITING_CONFIRMATION`, read the plan, then apply it — and note that
+**`${variables}` go on the apply call, not the start call**:
+
+```
+POST /pods/{pod_id}/bundle/imports/{import_id}/apply
+{ "variables": { "github_account": "…", "github_installation": "…" } }
+```
+
+**Into a brand-new pod, two of those cannot exist yet.** Both need a connected
+GitHub account. Apply without them: the four webhook automations import unrouted,
+which is expected — connect GitHub, then **delete and re-create** those four with
+the variables supplied. Updating them is not enough; provisioning only runs when a
+schedule is created.
+
+**The import does not name the pod** — see the task at the top of
+[AGENTS.md](AGENTS.md). It does not apply `pod_default`'s grants either; that
+command is in step 2 below.
 
 Or from a local clone:
 
