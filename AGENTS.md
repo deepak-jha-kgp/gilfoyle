@@ -82,6 +82,7 @@ nowhere. Not a widget either. Report in plain text.
 | `surfaces/` | The email address each agent answers on. Created for you; here so a fresh import keeps them |
 | `apps/shipyard-app/` | The app as it ships. `source/` is **built output**, uploaded as-is — that is what makes an import fast. `DESIGN.md` beside it |
 | `app/` | The React project that output is built from. `./app/build.sh` rebuilds it and rewrites `apps/shipyard-app/source/`. Editing the app means editing here |
+| `PLAYBOOK.md` | The general version of what this repo does, for the next pod: ship the app built, one script, name the hero, say it to the person |
 | `setup.sh` | Sets a fresh pod up end to end: name, import, then a brief telling you what to say |
 | `wire-github.sh` | Run once, after a GitHub account is connected: gives the four inbound automations their routing key |
 | `seed/` | `ingest.sh` pulls **real** GitHub events and hands them to the triager |

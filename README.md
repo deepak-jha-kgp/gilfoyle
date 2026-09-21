@@ -411,6 +411,14 @@ seed/build_payloads.py         shapes `gh` output into webhook payloads
 payloads/                      one fixture for testing an agent by hand
 ```
 
+## Doing this to another pod
+
+[PLAYBOOK.md](PLAYBOOK.md) is the general version: why the app ships built, the
+order inside `setup.sh` and which bit of it was a bug first, how to pick a hero
+and why it has to be a sentence somebody says rather than a command they run, and
+the three detours worth forbidding outright. This repository is its worked
+example.
+
 ## A note on the names
 
 Three things are nearly the same word, on purpose and not:
