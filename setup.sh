@@ -57,6 +57,30 @@ if ! lemma pods import . --set-pod-meta --var "shipyard_app_slug=$SLUG" >"$LOG" 
   fi
 fi
 
+# The importer applies grants LAST -- after schedules, after surfaces, after
+# files. Anything that fails in between takes them with it and leaves workloads
+# granted nothing at all: an import that printed "created" for every resource
+# and a pod that cannot do a single thing. That is not hypothetical; it happened
+# on a pod whose own email surface was named slightly differently from this
+# bundle's, and it cost somebody six minutes of reading CLI source to work out
+# why. So read the grants back, and put them back from the bundle if they are
+# missing. `--from-bundle` exists for exactly this.
+for kind in agents functions; do
+  [ -d "$kind" ] || continue
+  for dir in "$kind"/*/; do
+    [ -d "$dir" ] || continue
+    name="$(basename "$dir")"
+    have="$(lemma "$kind" permissions get "$name" --output json 2>/dev/null \
+      | python3 -c 'import json,sys
+try: print(len(json.load(sys.stdin).get("grants") or []))
+except Exception: print(-1)' 2>/dev/null || echo -1)"
+    if [ "$have" = "0" ]; then
+      echo "note: $name imported with no grants — restoring them from the bundle" >&2
+      lemma "$kind" permissions replace "$name" --from-bundle "$dir" >/dev/null 2>&1 || true
+    fi
+  done
+done
+
 # 3. Read back what landed, and the addresses it was given. These are all
 #    independent, so they go at once rather than one after another.
 D="$(mktemp -d)"
@@ -96,6 +120,14 @@ try:
 except Exception: pass
 ' "$D/surf")"
 rm -rf "$D"
+
+# `seed/ingest.sh` reads a repository with the `gh` CLI. Offering that to somebody
+# whose workspace has no GitHub login is offering them a failure, so find out
+# first and leave the lines out rather than promise it.
+SEED_LINE="  · fill it from a repo you already have — I pull the real failures,"
+SEED_LINE2="    issues and pull requests out of its history and read them for you"
+SEED_LINE3="    (a few minutes, and nothing in the queue is ever made up)"
+if ! gh auth status >/dev/null 2>&1; then SEED_LINE=""; SEED_LINE2=""; SEED_LINE3=""; fi
 
 cat <<TXT
 
@@ -137,8 +169,8 @@ $SEED_LINE3
 
   There is a board as well:
   $APP_URL
-  and you can forward anything to $MAIL_TRIAGER to have it
-  looked at. ($MAIL_FIXER asks for a change;
-  $MAIL_POD reaches me.)
+
+  And it answers on email:
+$INBOXES
 
 TXT
