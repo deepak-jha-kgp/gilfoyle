@@ -23,12 +23,6 @@ export LEMMA_POD_ID
 #    org is a 409 that would take the whole import down with it. Renaming from a
 #    directory holding nothing but pod.json costs four seconds and can cost
 #    nothing else.
-META="$(mktemp -d)"; trap 'rm -rf "$META"' EXIT
-cp pod.json "$META/"
-if ! lemma pods import "$META" --set-pod-meta >/dev/null 2>&1; then
-  echo "note: could not name this pod 'gilfoyle' — something else in this" >&2
-  echo "      organization already is. Carrying on; nothing else depends on it." >&2
-fi
 
 # 2. Everything else. No build and no --var: `apps/shipyard-app/source/` is built
 #    output with no package.json, so the CLI uploads it as-is instead of running
@@ -47,32 +41,61 @@ fi
 SLUG="shipyard-app-$(printf '%s' "${LEMMA_POD_ID//-/}" | tail -c 12)"
 LOG="$(mktemp)"
 echo "setting up — about fifteen seconds"
-if ! lemma pods import . --var "shipyard_app_slug=$SLUG" >"$LOG" 2>&1; then
-  echo "the import failed. Full output:" >&2
-  cat "$LOG" >&2
-  exit 1
+# One call when the pod's name is free. `--set-pod-meta` applies metadata before
+# any resource, so the email surfaces are created already carrying the new name --
+# and if the name is taken it is a 409 that aborts in seconds, before anything
+# exists, which is why the fallback is a plain re-import rather than a repair.
+if ! lemma pods import . --set-pod-meta --var "shipyard_app_slug=$SLUG" >"$LOG" 2>&1; then
+  if grep -q 'POD_CONFLICT' "$LOG"; then
+    echo "note: could not name this pod 'gilfoyle' — something else in this" >&2
+    echo "      organization already is. Importing without the rename." >&2
+    if ! lemma pods import . --var "shipyard_app_slug=$SLUG" >"$LOG" 2>&1; then
+      echo "the import failed. Full output:" >&2; cat "$LOG" >&2; exit 1
+    fi
+  else
+    echo "the import failed. Full output:" >&2; cat "$LOG" >&2; exit 1
+  fi
 fi
 
-# 3. Read back what landed, and the addresses it was given.
-APP_URL="$(lemma apps get shipyard-app --output json | python3 -c 'import json,sys; print(json.load(sys.stdin).get("url") or "")')"
-AUTHORIZE="$(lemma connectors connect-requests create github --output json \
-  | python3 -c 'import json,sys; print(json.load(sys.stdin)["authorization_url"])')"
-read -r MAIL_TRIAGER MAIL_FIXER MAIL_POD <<<"$(lemma surfaces list --output json | python3 -c '
-import json, sys
-d = json.load(sys.stdin)
-by = {}
-for s in (d["items"] if isinstance(d, dict) else d):
-    by[s["name"]] = (s.get("reach") or {}).get("email") or "-"
-print(by.get("resend-triager","-"), by.get("resend-fixer","-"), by.get("resend-assistant","-"))
-')"
+# 3. Read back what landed, and the addresses it was given. These are all
+#    independent, so they go at once rather than one after another.
+D="$(mktemp -d)"
+lemma apps get shipyard-app --output json >"$D/app"  2>/dev/null &
+lemma surfaces list --output json         >"$D/surf" 2>/dev/null &
+lemma connectors connect-requests create github --output json >"$D/cr" 2>/dev/null &
+wait
 
-# `seed/ingest.sh` reads a repository with the `gh` CLI. Offering it to somebody
-# whose workspace has no GitHub login is offering them a failure, so find out
-# first and leave the line out rather than promise it.
-SEED_LINE="  · fill it from a repo you already have — I pull the real failures,"
-SEED_LINE2="    issues and pull requests out of its history and read them for you"
-SEED_LINE3="    (a few minutes, and nothing in the queue is ever made up)"
-if ! gh auth status >/dev/null 2>&1; then SEED_LINE=""; SEED_LINE2=""; SEED_LINE3=""; fi
+APP_URL="$(python3 -c '
+import json, sys
+try: print(json.load(open(sys.argv[1])).get("url") or "the app")
+except Exception: print("the app")
+' "$D/app")"
+AUTHORIZE="$(python3 -c '
+import json, sys
+try: print(json.load(open(sys.argv[1]))["authorization_url"])
+except Exception: print("(no authorization url came back — start one from the connectors page)")
+' "$D/cr")"
+# The two agent surfaces are named for this pod, so they read `triager.gilfoyle@`.
+# The assistant's is the pod's own address and predates the rename above -- it is
+# listed last, as the catch-all it actually is.
+INBOXES="$(python3 -c '
+import json, sys
+try:
+    d = json.load(open(sys.argv[1]))
+    by = {}
+    for s in (d["items"] if isinstance(d, dict) else d):
+        by[s["name"]] = (s.get("reach") or {}).get("email") or ""
+    rows = [(by.get("resend-triager"), "to have something triaged"),
+            (by.get("resend-fixer"), "to ask for a change"),
+            (by.get("resend-assistant"), "anything else")]
+    rows = [r for r in rows if r[0]]
+    pad = max([len(r[0]) for r in rows] or [0])
+    for i, row in enumerate(rows):
+        label = "  Email it  " if i == 0 else "            "
+        print(label + row[0].ljust(pad) + "  " + row[1])
+except Exception: pass
+' "$D/surf")"
+rm -rf "$D"
 
 cat <<TXT
 
