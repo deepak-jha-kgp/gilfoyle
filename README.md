@@ -131,6 +131,12 @@ fixer through exactly the same door.
 
 ## Setting it up
 
+The quickest path is [SETUP-PROMPT.md](SETUP-PROMPT.md): a prompt to hand a fresh
+pod's agent that walks the whole thing, and doubles as a runbook if you would
+rather do it yourself.
+
+### By hand
+
 Import never creates the pod, and connectors never travel in a bundle.
 
 From this repository, straight into a pod that already exists — which is how this
