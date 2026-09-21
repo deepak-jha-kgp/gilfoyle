@@ -77,6 +77,35 @@ nobody has connected cannot be resolved, and an unresolved account variable is
 silently dropped — leaving a webhook schedule that looks right and can never fire.
 Import without it, connect afterwards, and wire it in a second script.
 
+## 2b. Export does not round-trip, and it carries more than you want
+
+Taking a working pod out with `lemma pods export` and putting it back with
+`lemma pods import` does not close on its own output. Three things, all found by
+running it rather than reading it:
+
+**Export writes fields import rejects.** Every agent row comes out with
+`"kind": "AGENT"`, and import fails bundle validation on it — *"Unrecognized
+field(s) on agent 'chronicler': kind"*. Validation fails before anything is
+created, so the failure is total and the message names a field you did not write.
+Strip it.
+
+**File contents do not travel unless you name them.** `export` takes
+`--folder <path>`, repeatable, and there is deliberately no "everything" flag;
+`import` takes `--with-files`. **Check whether the pod's judgement is in files
+before you assume it is in the bundle.** A pod whose instructions live in
+`/memory/AGENTS.md` will import with every table, agent, function and schedule
+intact and then do *nothing at all*, because the part that knows what it is for
+was never in the archive. That failure is silent and it looks like success.
+
+**Export carries the app's `.env.local`.** It comes out of the pod holding the
+pod id and API host it was exported from, and Vite reads `.env` files off disk
+regardless of what is in the process environment — so clearing the environment is
+not enough. Move the files aside for the build, and keep the uuid guard.
+
+**And read the sample data before publishing it.** One app's fixtures held five
+colleagues' real addresses, their full names, and a remark ranking three of them
+by name. It had always been fine, because the repository had always been private.
+
 ## 3. The hero: one sentence, and the thing itself
 
 The hero is the first thing the pod does that the person could not have done in
@@ -167,6 +196,15 @@ work. Telling it what *not* to do is worth more than telling it what to do:
 - [ ] Timed on a genuinely fresh pod, twice — the second one catches what the
       first one left behind
 
-Worked example: everything in this repository. [setup.sh](setup.sh),
+Three worked examples, in the order they were built:
+[gilfoyle](https://github.com/deepak-jha-kgp/gilfoyle) (engineering triage — a
+connector, a webhook routing key, a queue filled from a real repository),
+[draper](https://github.com/deepak-jha-kgp/draper) (brand — no connector at all,
+and the first thing you say *is* the setup), and
+[donna](https://github.com/deepak-jha-kgp/donna) (chief of staff — a connector,
+an owner substituted at import, and a hero deliberately left behind a yes,
+because reading somebody's mail is not a side effect of setting a pod up).
+
+Everything in this repository is the first of them. [setup.sh](setup.sh),
 [wire-github.sh](wire-github.sh), [app/build.sh](app/build.sh),
 [SETUP-PROMPT.md](SETUP-PROMPT.md), and the reasoning in [AGENTS.md](AGENTS.md).
