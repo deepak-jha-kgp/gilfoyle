@@ -83,10 +83,26 @@ done
 
 # 3. Read back what landed, and the addresses it was given. These are all
 #    independent, so they go at once rather than one after another.
+# A fresh organization has no auth config for GitHub, and a connect request against a
+# connector nobody has installed comes back `404 CONNECTOR_NOT_FOUND` -- which
+# reads like the platform does not support it. It does. `auth-configs create`
+# installs the platform's own OAuth app (SYSTEM_DEFAULT: no client id, no secret,
+# nobody types anything), and the very same request then returns a real
+# authorization URL. Somebody lost a setup to that 404, so try, install, retry.
+github_authorize() {
+  local out
+  out="$(lemma connectors connect-requests create github --output json 2>/dev/null || true)"
+  if ! printf '%s' "$out" | grep -q authorization_url; then
+    lemma connectors auth-configs create github >/dev/null 2>&1 || true
+    out="$(lemma connectors connect-requests create github --output json 2>/dev/null || true)"
+  fi
+  printf '%s' "$out"
+}
+
 D="$(mktemp -d)"
 lemma apps get shipyard-app --output json >"$D/app"  2>/dev/null &
 lemma surfaces list --output json         >"$D/surf" 2>/dev/null &
-lemma connectors connect-requests create github --output json >"$D/cr" 2>/dev/null &
+github_authorize >"$D/cr" 2>/dev/null &
 wait
 
 APP_URL="$(python3 -c '
