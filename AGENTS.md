@@ -15,17 +15,23 @@ Two commands, and the second one is somebody else's.
 ```bash
 git clone --depth 1 https://github.com/deepak-jha-kgp/gilfoyle && cd gilfoyle
 export LEMMA_POD_ID=<pod>     # already set inside a pod's own workspace
-./setup.sh            # ~15s: everything, then what to tell the person
+./setup.sh            # ~15s: everything, then a note telling you what to say
 # ... they authorize ...
 ./wire-github.sh      # gives the four inbound automations their routing key
 ```
 
-Measured end to end on a fresh pod: 15 seconds. `setup.sh` finishes by printing
-the orientation a person needs — the app's address, the three inboxes, the GitHub
-link, and what is worth doing next — so hand that on as printed rather than
-writing your own. Read [setup.sh](setup.sh) rather than reproducing it by hand:
-it is short, and every line is there because doing it some other way was slower
-or wrong.
+Measured end to end on a fresh pod: 15 seconds. Read [setup.sh](setup.sh) rather
+than reproducing it by hand — it is short, and every line is there because doing
+it some other way was slower or wrong.
+
+**Keep the checkout.** `wire-github.sh` and `seed/ingest.sh` are run from it later,
+by you, when the person answers. They are never given to the person as commands.
+
+`setup.sh` prints nothing while it works and ends with a note addressed to *you*,
+holding a draft of what to say and a table of what to run when they reply. Say it
+in prose. Somebody who asked for this in a chat is on a phone; a wall of `created`
+rows, a bare URL list, or an instruction to run a shell script is the wrong answer
+to the only question they have, which is what this does and what to do next.
 
 **There is nothing to build and no variable to resolve.** The app under
 `apps/shipyard-app/source/` is already built, so the import uploads it as-is —
@@ -41,6 +47,14 @@ organization that already has a `gilfoyle`, a `409 POD_CONFLICT` takes the entir
 import down with it before a single table is created. `setup.sh` imports the
 resources first and then renames from a directory holding nothing but `pod.json`,
 which costs four seconds and cannot cost anything else.
+
+**The app's slug is named on purpose.** `public_slug` is unique across every pod
+on the server, and the CLI's fallback when one collides is the pod id's first
+*eight* hex characters — which two pods created in the same instant share. When
+that 409s the app step takes the whole import with it, schedules and grants
+included. `setup.sh` passes `--var shipyard_app_slug=shipyard-app-<12 hex from the
+id's tail>`, which is random rather than time-ordered. This was not hypothetical;
+it happened while timing the script.
 
 **Four automations land unrouted, and that is expected.** `ci-failure`,
 `pr-opened`, `pr-comment` and `issue-opened` route on a GitHub App installation
@@ -68,7 +82,7 @@ nowhere. Not a widget either. Report in plain text.
 | `surfaces/` | The email address each agent answers on. Created for you; here so a fresh import keeps them |
 | `apps/shipyard-app/` | The app as it ships. `source/` is **built output**, uploaded as-is — that is what makes an import fast. `DESIGN.md` beside it |
 | `app/` | The React project that output is built from. `./app/build.sh` rebuilds it and rewrites `apps/shipyard-app/source/`. Editing the app means editing here |
-| `setup.sh` | Sets a fresh pod up end to end: name, import, then the orientation to hand the person |
+| `setup.sh` | Sets a fresh pod up end to end: name, import, then a brief telling you what to say |
 | `wire-github.sh` | Run once, after a GitHub account is connected: gives the four inbound automations their routing key |
 | `seed/` | `ingest.sh` pulls **real** GitHub events and hands them to the triager |
 | `payloads/` | One fixture for testing an agent by hand |

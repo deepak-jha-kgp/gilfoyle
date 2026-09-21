@@ -3,15 +3,24 @@
 Paste this into a fresh pod's chat. Everything it needs to know is in the repo.
 
 ```
-Set this pod up from https://github.com/deepak-jha-kgp/gilfoyle: clone it, run
-./setup.sh, and do nothing else — no dry run, no npm, no browser, no widget, no
-data you invented. Then show me what it printed, as it printed it.
+Set this pod up from https://github.com/deepak-jha-kgp/gilfoyle: clone it and run
+./setup.sh — nothing else, and nothing invented. It ends with a note addressed to
+you; follow it, and keep the checkout, you will need it again.
 ```
 
-`setup.sh` ends by printing the thing a person actually needs: where the app is,
-the three addresses it answers on, the GitHub link only they can open, and the two
-things worth doing afterwards. That copy lives in the script rather than in the
-agent's judgement, so it reads the same every time and costs nothing to produce.
+`setup.sh` says almost nothing while it works — sixteen lines of `created` is a
+build log, and pasting one at somebody is not an introduction. It ends instead with
+a note **addressed to the agent**: a draft of what to tell the person, in prose,
+and a short table of what to run itself when they answer.
+
+That is the part worth getting right. Whoever is reading is on a phone, and they
+asked for a thing, not for a terminal — so every next step is phrased as something
+they **say**, never as a command they run. "Fill it from a repo you already have"
+rather than `./seed/ingest.sh <owner/repo> 4`; "start watching by itself" rather
+than `lemma schedules resume`. The agent runs those; that is what it is for. The
+script even checks whether the `gh` CLI is signed in, and leaves the seeding offer
+out entirely when it is not, because offering somebody a step that will fail is
+worse than not offering it.
 
 The pod's own assistant can carry this out as delivered: it runs with a fixed,
 batteries-included toolset — a shell, a browser, the pod tools, sub-agents — and

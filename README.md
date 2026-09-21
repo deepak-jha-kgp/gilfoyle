@@ -139,8 +139,9 @@ LEMMA_POD_ID=<pod> ./setup.sh
 ```
 
 That is tables, both agents with their grants, all five automations, the email
-surfaces, the app deployed, the pod named — and it ends by printing where the app
-is, the three addresses it answers on, the GitHub link, and what to do next. Nothing is built and no `${variable}` has to be
+surfaces, the app deployed and the pod named — quietly, and ending with a note
+telling whoever ran it what to say to whoever asked for it. Keep the checkout:
+`wire-github.sh` and `seed/ingest.sh` are run from it afterwards. Nothing is built and no `${variable}` has to be
 resolved: `apps/shipyard-app/source/` ships as built output, which the CLI uploads
 as-is. Then two things are left, and only the first is required:
 [connect GitHub](#1-connect-github--required), and
